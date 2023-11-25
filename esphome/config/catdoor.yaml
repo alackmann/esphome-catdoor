@@ -1,0 +1,112 @@
+substitutions:
+  # change device name to match your desired name
+  device_name: catdoor
+  device_name_pretty: "catdoor controller"
+  gpio_servo_pin: D3
+
+  # deep sleep settings. Adjust as you need
+  sleep_duration_awake: 5s
+  sleep_duration: 900s
+
+  # adjust these perm ip settings to suit your network
+  static_ip_address: 10.10.99.2
+  static_ip_gateway: 10.10.99.1
+  static_ip_subnet: 255.255.255.0
+
+  # enter the address for your mqqt broker (eg. the mosquitto instance)
+  mqtt_broker: 192.168.1.2
+  log_level: DEBUG
+
+esphome:
+  name: $device_name
+
+esp8266:
+  board: d1_mini
+  restore_from_flash: true
+
+ota:
+  password: !secret ota_password
+
+mqtt:
+  broker: $mqtt_broker
+  id: mqtt_client
+  topic_prefix: homeassistant/$device_name
+  on_message:
+    - topic: homeassistant/ota_mode
+      payload: 'ON'
+      then:
+        - logger.log: 
+            format: "OTA mode ON - battery usage elevated"
+            level: INFO
+        - deep_sleep.prevent: deep_sleep_1
+    - topic: homeassistant/ota_mode
+      payload: 'OFF'
+      then:
+        - logger.log: 
+            format: "OTA mode OFF - deep sleep now available"
+            level: INFO
+        - deep_sleep.allow: deep_sleep_1
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # update this to override OTA update target
+  use_address: $static_ip_address
+  fast_connect: true
+  manual_ip:
+    static_ip: $static_ip_address
+    gateway: $static_ip_gateway
+    subnet: $static_ip_subnet
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: !secret fallback_wifi_ssid
+    password: !secret fallback_wifi_password
+
+captive_portal:
+
+http_request:
+  useragent: esphome/$device_name
+  timeout: 2s
+
+# Enable logging
+logger:
+  level: $log_level
+
+output:
+  - platform: esp8266_pwm
+    id: pwm_output
+    pin: $gpio_servo_pin
+    frequency: 50 Hz
+
+servo:
+  - id: catdoor_servo
+    output: pwm_output
+    auto_detach_time: 2s
+    max_level: 12.8%
+
+number:
+  - platform: template
+    id: catdoor_position
+    name: "catdoorposition"
+    min_value: -100
+    # initial_value: 0
+    max_value: 100
+    step: 1
+    # optimistic: true
+    restore_value: true
+    set_action:
+      then:
+        - servo.write:
+            id: catdoor_servo
+            level: !lambda 'return x / 100.0;'
+
+sensor:
+  - platform: adc
+    pin: VCC
+    name: "VCC Voltage"
+
+deep_sleep:
+  id: deep_sleep_1
+  run_duration: $sleep_duration_awake
+  sleep_duration: $sleep_duration

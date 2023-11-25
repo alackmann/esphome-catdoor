@@ -1,0 +1,7 @@
+sitemap label="Catdoor" {
+  Text label="Catdoor" {
+    Switch item=Catdoor_Position_Text label="Cat door" icon="door" mappings=['open'='Open','in only'='Entry only','closed'='Closed'] 		
+    Text item=Catdoor_Voltage icon=battery
+    Switch item=ESPHome_OTA_Mode_Prod
+  }
+}
