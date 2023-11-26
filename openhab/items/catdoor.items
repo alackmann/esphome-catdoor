@@ -1,3 +1,5 @@
 String Catdoor_Position_Text "Cat door setting"
 Number Catdoor_Position_Number "Cat door value" (Motion) {channel="mqtt:topic:mqttBroker:catdoor:catdoor_position"} 
 Number Catdoor_Voltage "Current voltage [%s]" (Battery) {channel="mqtt:topic:mqttBroker:catdoor:voltage"} 
+
+Switch ESPHome_OTA_Mode_Prod   "OTA Mode [prod]" {channel="mqtt:topic:mqttBroker:esphome:ota_prod_enabled"}

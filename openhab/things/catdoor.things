@@ -2,9 +2,7 @@ Thing mqtt:topic:mqttBroker:catdoor "ESPHome - Catdoor (mqtt)" (mqtt:broker:your
     Channels:
         Type number : catdoor_position "Catdoor Position" [ 
           stateTopic="homeassistant/catdoor/number/catdoorposition/state", 
-          commandTopic="homeassistant/catdoor/number/catdoorposition/command", 
-          on="ON",
-          off="OFF",
+          commandTopic="homeassistant/catdoor/number/catdoorposition/command",
           retained=true  // Set this option to retain command messages
         ]
         Type number : voltage "Voltage Level" [ 
@@ -16,6 +14,8 @@ Thing mqtt:topic:mqttBroker:esphome "ESPHome Config" (mqtt:broker:yourbrokerid) 
     Channels:
         Type switch : ota_prod_enabled "OTA Enabled [prod]" [ 
           commandTopic="homeassistant/ota_mode",
+          on="ON", 
+          off="OFF",
           retained=true  // Set this option to retain command messages
         ]
 }
